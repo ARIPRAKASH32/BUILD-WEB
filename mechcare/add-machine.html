@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Machine | Mechcare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+</nav>
+</div>
+</header>
+
+<main class="container mt-md" style="max-width: 600px;">
+
+    <div class="card animate-fade-in">
+        <h1 class="mb-md">Add New Machine</h1>
+        <p class="text-muted mb-md">Register new equipment to track maintenance schedules.</p>
+
+        <form id="add-machine-form">
+            <div class="form-group">
+                <label class="form-label">Machine Name</label>
+                <input type="text" id="name" class="form-control" placeholder="e.g. CNC Lathe MX-200" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">User Name</label>
+                <input type="text" id="user-name" class="form-control" placeholder="e.g. John Doe" required>
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Name of the person responsible
+                    for this machine</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Mobile Number</label>
+                <input type="tel" id="mobile-number" class="form-control" placeholder="e.g. +91 98765 43210" required
+                    pattern="[0-9+\s-()]+">
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Contact number for
+                    machine-related notifications</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Machine Type</label>
+                <input type="text" id="type" class="form-control" list="machine-types"
+                    placeholder="e.g. CNC Lathe, Hydraulic Press, etc." required>
+                <datalist id="machine-types">
+                    <option value="Lathe">
+                    <option value="Milling Machine">
+                    <option value="Drill Press">
+                    <option value="Hydraulic Press">
+                    <option value="Compressor">
+                    <option value="Generator">
+                    <option value="CNC Machine">
+                    <option value="Grinder">
+                    <option value="Welding Machine">
+                    <option value="Conveyor System">
+                </datalist>
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Type any machine type or select
+                    from suggestions</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Last Service Date</label>
+                <input type="date" id="last-service-date" class="form-control" required>
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">When was the last maintenance
+                    performed?</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Maintenance Interval (Days)</label>
+                <input type="number" id="interval" class="form-control" placeholder="e.g. 30" min="1" required>
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">How often does this machine
+                    need service?</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Current Runtime Hours</label>
+                <input type="number" id="runtime-hours" class="form-control" placeholder="e.g. 120" min="0" step="0.1"
+                    value="0">
+                <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">
+                    Total operating hours since last maintenance. <strong id="runtime-days">0 days</strong>
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                <a href="machines.html" class="btn btn-outline" style="flex: 1;">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="flex: 2;">Save Machine</button>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+<script src="js/main.js"></script>
+<script>
+    // Live conversion display
+    document.getElementById('runtime-hours').addEventListener('input', (e) => {
+        const hours = parseFloat(e.target.value) || 0;
+        const days = (hours / 24).toFixed(2);
+        document.getElementById('runtime-days').innerText = `${days} days`;
+    });
+
+    document.getElementById('add-machine-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const userName = document.getElementById('user-name').value;
+        const mobileNumber = document.getElementById('mobile-number').value;
+        const type = document.getElementById('type').value;
+        const lastServiceDate = document.getElementById('last-service-date').value;
+        const interval = document.getElementById('interval').value;
+        const runtimeHours = document.getElementById('runtime-hours').value;
+
+        const newMachine = MechCare.addMachine({
+            name,
+            userName,
+            mobileNumber,
+            type,
+            lastServiceDate,
+            interval,
+            runtimeHours
+        });
+
+        alert(`Machine "${newMachine.name}" added successfully!`);
+        window.location.href = 'machines.html';
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Mechcare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<!-- Settings Icon -->
+<a href="settings.html" class="nav-link active" title="Settings">⚙</a>
+</nav>
+</div>
+</header>
+
+<main class="container mt-md" style="max-width: 800px;">
+
+    <h1 class="mb-md">Settings</h1>
+
+    <div class="card mb-md">
+        <h3>General Preferences</h3>
+        <p class="text-muted mb-md">Customize your experience.</p>
+
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-light);">
+            <div>
+                <div style="font-weight: 600;">Dark Mode</div>
+                <div class="text-muted" style="font-size: 0.9rem;">Enable dark industrial theme</div>
+            </div>
+            <!-- Mock Toggle -->
+            <div style="color: var(--success);">Enabled (Locked)</div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0;">
+            <div>
+                <div style="font-weight: 600;">Maintenance Notifications</div>
+                <div class="text-muted" style="font-size: 0.9rem;">Alert when machines are due</div>
+            </div>
+            <div style="color: var(--success);">On</div>
+        </div>
+    </div>
+
+    <div class="card mb-md" style="border-color: var(--primary-dim);">
+        <h3>Data Management</h3>
+        <p class="text-muted mb-md">Control your local data.</p>
+
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="exportData()" class="btn btn-outline">Export JSON</button>
+            <button onclick="importData()" class="btn btn-outline">Import JSON</button>
+        </div>
+    </div>
+
+    <div class="card" style="border-color: var(--danger-dim);">
+        <h3 class="text-danger">Danger Zone</h3>
+        <p class="text-muted mb-md">Irreversible actions.</p>
+
+        <button onclick="clearAllData()" class="btn btn-danger">Reset Application Data</button>
+    </div>
+
+</main>
+
+<script src="js/main.js"></script>
+<script>
+    function exportData() {
+        const dataStr = localStorage.getItem('mechcare_data');
+        if (!dataStr) {
+            alert('No data to export.');
+            return;
+        }
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mechcare-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    }
+
+    function importData() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    JSON.parse(event.target.result); // Validate JSON
+                    localStorage.setItem('mechcare_data', event.target.result);
+                    alert('Data imported successfully. Reloading...');
+                    location.reload();
+                } catch (err) {
+                    alert('Invalid JSON file.');
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    }
+
+    function clearAllData() {
+        if (confirm('Are you ABSOLUTELY sure? This will delete all your machines and logs. This cannot be undone.')) {
+            localStorage.removeItem('mechcare_data');
+            location.reload();
+        }
+    }
+</script>
+</body>
+
+</html>

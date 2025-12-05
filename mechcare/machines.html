@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machines | MechCare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <span
+                    style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(135deg, #00f2ea 0%, #00a8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">MECH</span><span
+                    style="font-weight: 800; font-size: 1.5rem; color: #fff;">CARE</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">Dashboard</a>
+                <a href="machines.html" class="nav-link active">Machines</a>
+                <a href="reports.html" class="nav-link">Reports</a>
+                <!-- <a href="chat.html" class="nav-link">AI Assistant</a> -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mt-md">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1>Machine Inventory</h1>
+                <p class="text-muted">Manage all your equipment and maintenance schedules.</p>
+            </div>
+            <a href="add-machine.html" class="btn btn-primary">+ Add Machine</a>
+        </div>
+
+        <!-- Filter/Search (Optional visual only for now) -->
+        <div class="card mb-md" style="padding: 1rem; display: flex; gap: 1rem;">
+            <input type="text" placeholder="Search machines..." class="form-control" id="search-input"
+                style="max-width: 300px;">
+            <select class="form-control" style="max-width: 200px;" id="sort-select">
+                <option value="status">Sort by Status</option>
+                <option value="name">Sort by Name</option>
+            </select>
+        </div>
+
+        <div id="machines-grid" class="grid-cols-3">
+            <!-- Machines injected here -->
+        </div>
+
+    </main>
+
+    <script src="js/main.js"></script>
+    <script>
+        // Define deleteMachine globally BEFORE DOMContentLoaded
+        window.deleteMachine = (id) => {
+            if (confirm('Are you sure you want to delete this machine?')) {
+                MechCare.deleteMachine(id);
+                location.reload();
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const machines = MechCare.getAllMachines();
+            const grid = document.getElementById('machines-grid');
+            const searchInput = document.getElementById('search-input');
+            const sortSelect = document.getElementById('sort-select');
+
+            function renderMachines(list) {
+                grid.innerHTML = '';
+                if (list.length === 0) {
+                    grid.innerHTML = `
+                        <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 4rem;">
+                            <h3>No machines found</h3>
+                            <p class="text-muted">Try adjusting your search or add a new machine.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.forEach(machine => {
+                    const status = MechCare.getMachineStatus(machine);
+                    const card = document.createElement('div');
+                    card.className = 'card animate-fade-in';
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.2rem;">${machine.name}</h3>
+                            <span class="badge badge-${status.color}">${status.status}</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: var(--radius-sm); margin-bottom: 1rem; display: inline-block; font-size: 0.85rem; color: var(--text-muted);">
+                            ${machine.type}
+                        </div>
+                        
+                        <div class="grid-cols-2" style="font-size: 0.85rem; row-gap: 0.8rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <span class="text-muted" style="display: block; font-size: 0.75rem;">Interval</span>
+                                ${machine.interval} days
+                            </div>
+                            <div>
+                                <span class="text-muted" style="display: block; font-size: 0.75rem;">Last Service</span>
+                                ${MechCare.formatDate(machine.lastMaintenance)}
+                            </div>
+                            <div>
+                                <span class="text-muted" style="display: block; font-size: 0.75rem;">Next Due</span>
+                                <span class="text-${status.color}">${status.days} DAYS LEFT</span>
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--border-light); padding-top: 1rem; display: flex; gap: 0.5rem;">
+                            <a href="machine-details.html?id=${machine.id}" class="btn btn-outline btn-sm" style="flex: 1;">Details</a>
+                            <button onclick="deleteMachine('${machine.id}')" class="btn btn-danger btn-sm" style="width: 40px;">🗑</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            renderMachines(machines);
+
+            // Simple Search Filter
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = machines.filter(m =>
+                    m.name.toLowerCase().includes(term) ||
+                    m.type.toLowerCase().includes(term)
+                );
+                renderMachines(filtered);
+            });
+        });
+    </script>
+</body>
+
+</html>

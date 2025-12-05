@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Details | Mechcare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+</nav>
+</div>
+</header>
+
+<main class="container mt-md">
+
+    <!-- Back Link -->
+    <a href="machines.html" class="text-muted"
+        style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+        ← Back to Machines
+    </a>
+
+    <!-- Header -->
+    <div class="card mb-md">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <h1 id="machine-name" style="margin: 0;">Loading...</h1>
+                    <span id="machine-status" class="badge">...</span>
+                </div>
+                <p id="machine-type" class="text-muted">...</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <button onclick="askAIAboutMachine()" class="btn btn-outline" style="min-width: 140px;">✨ Ask
+                    AI</button>
+                <a href="#" id="view-logs-btn" class="btn btn-primary">Maintenance Logs</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="grid-cols-4 mb-md">
+        <div class="card">
+            <h3 class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Quality Rating</h3>
+            <div class="flex-center" style="justify-content: space-between; margin-top: 1rem;">
+                <span id="quality-rating" style="font-size: 2.5rem; font-weight: 800;">--%</span>
+                <div style="font-size: 1.5rem; color: var(--primary);">🩺</div>
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Based on runtime</div>
+        </div>
+
+        <div class="card">
+            <h3 class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Runtime Hours</h3>
+            <div class="flex-center" style="justify-content: space-between; margin-top: 1rem;">
+                <span id="runtime-hours" style="font-size: 2.5rem; font-weight: 800;">--</span>
+                <div style="font-size: 1.5rem; color: var(--text-muted);">⏱</div>
+            </div>
+            <div id="runtime-days" class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">-- days</div>
+        </div>
+
+        <div class="card">
+            <h3 class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Maintenance Interval</h3>
+            <div class="flex-center" style="justify-content: space-between; margin-top: 1rem;">
+                <span id="machine-interval" style="font-size: 2.5rem; font-weight: 800;">--</span>
+                <div style="font-size: 1.5rem; color: var(--text-muted);">📅</div>
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Days between service</div>
+        </div>
+
+        <div class="card">
+            <h3 class="text-muted" style="font-size: 0.8rem; text-transform: uppercase;">Next Service</h3>
+            <div class="flex-center" style="justify-content: space-between; margin-top: 1rem;">
+                <span id="days-left" style="font-size: 2.5rem; font-weight: 800;">--</span>
+                <div style="font-size: 1.5rem; color: var(--text-muted);">⏱</div>
+            </div>
+            <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Days remaining</div>
+        </div>
+    </div>
+
+    <!-- Update Runtime Section -->
+    <div class="card mb-md" style="border: 1px solid var(--primary-dim);">
+        <h3 style="margin-bottom: 0.5rem;">Update Runtime Hours</h3>
+        <p class="text-muted mb-md">Add operating hours to track machine quality and maintenance needs.</p>
+        <div style="display: flex; gap: 1rem; align-items: end;">
+            <div class="form-group" style="flex: 1; margin: 0;">
+                <label class="form-label">Add Hours</label>
+                <input type="number" id="add-hours-input" class="form-control" placeholder="e.g. 8" min="0" step="0.1">
+            </div>
+            <button onclick="addRuntimeHours()" class="btn btn-primary">Update Runtime</button>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="grid-cols-2">
+        <div class="card" style="border: 1px solid var(--primary-dim);">
+            <h3 style="margin-bottom: 0.5rem;">Need Support?</h3>
+            <p class="text-muted mb-md">Generate a formal request for the showroom or technician.</p>
+            <button onclick="generateShowroomMessage()" class="btn btn-outline" style="width: 100%;">Create Service
+                Request</button>
+        </div>
+
+        <div class="card" style="border: 1px solid var(--success-dim);">
+            <h3 style="margin-bottom: 0.5rem;">Health Report</h3>
+            <p class="text-muted mb-md">Download a comprehensive health report receipt.</p>
+            <button onclick="generateReceipt()" class="btn btn-outline" style="width: 100%;">Generate
+                Receipt</button>
+        </div>
+    </div>
+
+</main>
+
+<script src="js/main.js"></script>
+<script src="js/ai.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const machineId = urlParams.get('id');
+
+        if (!machineId) {
+            alert('No machine specified');
+            window.location.href = 'machines.html';
+            return;
+        }
+
+        const machine = MechCare.getMachine(machineId);
+        if (!machine) {
+            alert('Machine not found');
+            window.location.href = 'machines.html';
+            return;
+        }
+
+        // Populate Info
+        const status = MechCare.getMachineStatus(machine);
+        document.getElementById('machine-name').innerText = machine.name;
+        document.getElementById('machine-type').innerText = machine.type;
+
+        const badge = document.getElementById('machine-status');
+        badge.innerText = status.status;
+        badge.className = `badge badge-${status.color}`;
+
+        document.getElementById('machine-interval').innerText = machine.interval;
+        document.getElementById('days-left').innerText = status.days;
+
+        // Get Quality Rating based on runtime hours
+        const qualityInfo = MechCare.getMachineQuality(machine);
+        document.getElementById('quality-rating').innerText = qualityInfo.quality + '%';
+        document.getElementById('quality-rating').style.color = qualityInfo.quality > 80 ? 'var(--success)' : (qualityInfo.quality > 50 ? 'var(--accent)' : 'var(--danger)');
+
+        // Display runtime hours and days
+        document.getElementById('runtime-hours').innerText = qualityInfo.runtimeHours.toFixed(1);
+        document.getElementById('runtime-days').innerText = qualityInfo.runtimeDays + ' days';
+
+        // Health Rating (for backward compatibility in reports)
+        let health = qualityInfo.quality;
+
+        // Link Logs Button
+        document.getElementById('view-logs-btn').href = `logs.html?id=${machineId}`;
+
+        // --- Window Actions ---
+        window.askAIAboutMachine = () => {
+            // Redirect to chat with context
+            window.location.href = `chat.html?context=maintenance&machine=${encodeURIComponent(machine.name)}`;
+        };
+
+        window.generateShowroomMessage = () => {
+            const msg = MechCareAI.generateShowroomMessage(machine.name, 'Periodic Maintenance Check');
+            alert("Message Copied to Clipboard:\n\n" + msg);
+            navigator.clipboard.writeText(msg);
+        };
+
+        window.generateReceipt = () => {
+            // Redirect to reports page with machine ID to auto-generate report
+            window.location.href = `reports.html?id=${machineId}`;
+        };
+
+        // Add Runtime Hours Function
+        window.addRuntimeHours = () => {
+            const hoursInput = document.getElementById('add-hours-input');
+            const hours = parseFloat(hoursInput.value);
+
+            if (hours && hours > 0) {
+                MechCare.updateMachineRuntime(machineId, hours);
+                hoursInput.value = '';
+
+                // Show success and reload
+                alert(`Added ${hours} hours to runtime. Reloading...`);
+                location.reload();
+            } else {
+                alert('Please enter a valid number of hours.');
+            }
+        };
+    });
+</script>
+</body>
+
+</html>

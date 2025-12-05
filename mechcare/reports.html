@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Reports | Mechcare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        .report-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-top: 2rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .report-header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .report-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .report-value {
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        .search-results {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .search-result-item {
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .search-result-item:hover {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+    </style>
+</head>
+<!-- <a href="chat.html" class="nav-link">AI Assistant</a> -->
+</nav>
+</div>
+</header>
+
+<main class="container mt-md" style="max-width: 900px;">
+
+    <h1 class="mb-md">Machine Reports</h1>
+    <p class="text-muted mb-md">Search for a machine by name to generate a detailed report.</p>
+
+    <!-- Search Section -->
+    <div class="card mb-md">
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Search Machine</label>
+            <input type="text" id="search-input" class="form-control" placeholder="Type machine name..." autofocus>
+            <p class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Start typing to see matching
+                machines</p>
+        </div>
+
+        <!-- Search Results -->
+        <div id="search-results" class="search-results" style="display: none;"></div>
+    </div>
+
+    <!-- Report Display -->
+    <div id="report-display" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h2>Generated Report</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                <button onclick="printReport()" class="btn btn-outline btn-sm">🖨 Print</button>
+                <button onclick="downloadReport()" class="btn btn-primary btn-sm">📥 Download</button>
+            </div>
+        </div>
+
+        <div id="report-content" class="report-container"></div>
+    </div>
+
+</main>
+
+<script src="js/main.js"></script>
+<script>
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+    const reportDisplay = document.getElementById('report-display');
+    const reportContent = document.getElementById('report-content');
+    let currentMachine = null;
+
+    // Live Search
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim().toLowerCase();
+
+        if (query.length === 0) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        const machines = MechCare.getAllMachines();
+        const matches = machines.filter(m =>
+            m.name.toLowerCase().includes(query) ||
+            m.type.toLowerCase().includes(query)
+        );
+
+        if (matches.length === 0) {
+            searchResults.innerHTML = '<p class="text-muted" style="padding: 1rem;">No machines found</p>';
+            searchResults.style.display = 'block';
+            return;
+        }
+
+        searchResults.innerHTML = matches.map(m => `
+                <div class="search-result-item" onclick="generateReport('${m.id}')">
+                    <div style="font-weight: 600;">${m.name}</div>
+                    <div class="text-muted" style="font-size: 0.85rem;">${m.type}</div>
+                </div>
+            `).join('');
+        searchResults.style.display = 'block';
+    });
+
+    // Check if machine ID is in URL parameters and auto-generate report
+    const urlParams = new URLSearchParams(window.location.search);
+    const machineIdFromUrl = urlParams.get('id');
+    if (machineIdFromUrl) {
+        // Auto-generate report for the machine
+        generateReport(machineIdFromUrl);
+        // Hide search results
+        searchResults.style.display = 'none';
+    }
+
+    // Generate Report
+    window.generateReport = (machineId) => {
+        const machine = MechCare.getMachine(machineId);
+        if (!machine) return;
+
+        currentMachine = machine;
+        const status = MechCare.getMachineStatus(machine);
+        const quality = MechCare.getMachineQuality(machine);
+        const logs = MechCare.getLogsForMachine(machineId);
+
+        const report = `
+<div class="report-header">
+    <h2 style="color: var(--primary); margin: 0;">Mechcare System Report</h2>
+    <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">
+        Generated: ${new Date().toLocaleString()}
+    </div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Machine Identification</div>
+    <div class="report-value">${machine.name}</div>
+    <div style="margin-top: 0.5rem; color: var(--text-muted);">Type: ${machine.type}</div>
+    <div style="color: var(--text-muted);">ID: ${machine.id}</div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Operational Status</div>
+    <div class="report-value" style="color: var(--${status.color});">${status.status}</div>
+    <div style="margin-top: 0.5rem; color: var(--text-muted);">
+        ${status.status === 'Overdue' ?
+                `⚠️ Maintenance overdue by ${status.days} days` :
+                `Next maintenance in ${status.days} days`
+            }
+    </div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Quality Metrics</div>
+    <div class="report-value" style="color: var(--${quality.quality > 80 ? 'success' : (quality.quality > 50 ? 'accent' : 'danger')});">
+        ${quality.quality}% Quality Rating
+    </div>
+    <div style="margin-top: 0.5rem; color: var(--text-muted);">
+        Runtime: ${quality.runtimeHours.toFixed(1)} hours (${quality.runtimeDays} days)
+    </div>
+    <div style="color: var(--text-muted);">
+        ${quality.needsMaintenance ? '⚠️ Maintenance Required' : '✓ Within acceptable range'}
+    </div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Maintenance Schedule</div>
+    <div class="report-value">${machine.interval} Days Interval</div>
+    <div style="margin-top: 0.5rem; color: var(--text-muted);">
+        Last Service: ${MechCare.formatDate(machine.lastMaintenance)}
+    </div>
+    <div style="color: var(--text-muted);">
+        Created: ${MechCare.formatDate(machine.createdDate)}
+    </div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Service History</div>
+    <div style="margin-top: 0.5rem;">
+        ${logs.length === 0 ?
+                '<div class="text-muted">No service records available</div>' :
+                `<div class="report-value">${logs.length} Service Record(s)</div>
+             <div style="margin-top: 1rem; max-height: 200px; overflow-y: auto;">
+                ${logs.slice(0, 5).map(log => `
+                    <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 4px; margin-bottom: 0.5rem;">
+                        <div style="font-weight: 600; color: var(--primary);">${MechCare.formatDate(log.date)}</div>
+                        <div style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem;">${log.notes}</div>
+                    </div>
+                `).join('')}
+                ${logs.length > 5 ? `<div class="text-muted" style="font-size: 0.85rem; margin-top: 0.5rem;">... and ${logs.length - 5} more records</div>` : ''}
+             </div>`
+            }
+    </div>
+</div>
+
+<div class="report-section">
+    <div class="report-label">Recommendations</div>
+    <div style="margin-top: 0.5rem;">
+        ${quality.needsMaintenance ?
+                '<div style="color: var(--danger); font-weight: 600;">⚠️ IMMEDIATE MAINTENANCE REQUIRED</div>' :
+                quality.quality < 50 ?
+                    '<div style="color: var(--accent); font-weight: 600;">⚠️ Schedule maintenance soon</div>' :
+                    '<div style="color: var(--success); font-weight: 600;">✓ Machine in good condition</div>'
+            }
+        <div style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+            ${quality.quality < 80 ?
+                '• Perform routine inspection<br>• Check lubrication levels<br>• Review operational logs' :
+                '• Continue normal operation<br>• Monitor runtime hours<br>• Maintain current schedule'
+            }
+        </div>
+    </div>
+</div>
+
+<div style="border-top: 1px solid var(--border-light); padding-top: 1rem; margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+    <div>Mechcare • Smart Maintenance Management</div>
+    <div style="margin-top: 0.25rem;">This report is automatically generated based on machine data</div>
+</div>
+            `.trim();
+
+        reportContent.innerHTML = report;
+        reportDisplay.style.display = 'block';
+        searchResults.style.display = 'none';
+
+        // Scroll to report
+        reportDisplay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // Print Report
+    window.printReport = () => {
+        window.print();
+    };
+
+    // Download Report
+    window.downloadReport = () => {
+        if (!currentMachine) return;
+
+        const status = MechCare.getMachineStatus(currentMachine);
+        const quality = MechCare.getMachineQuality(currentMachine);
+        const logs = MechCare.getLogsForMachine(currentMachine.id);
+
+        const textReport = `
+MECHCARE SYSTEM REPORT
+Generated: ${new Date().toLocaleString()}
+================================================================================
+
+MACHINE IDENTIFICATION
+Name:     ${currentMachine.name}
+Type:     ${currentMachine.type}
+ID:       ${currentMachine.id}
+
+OPERATIONAL STATUS
+Status:   ${status.status}
+${status.status === 'Overdue' ?
+                `Overdue: ${status.days} days` :
+                `Next Maintenance: ${status.days} days`
+            }
+
+QUALITY METRICS
+Quality Rating: ${quality.quality}%
+Runtime Hours:  ${quality.runtimeHours.toFixed(1)} hours
+Runtime Days:   ${quality.runtimeDays} days
+Maintenance:    ${quality.needsMaintenance ? 'REQUIRED' : 'Not Required'}
+
+MAINTENANCE SCHEDULE
+Interval:       ${currentMachine.interval} days
+Last Service:   ${MechCare.formatDate(currentMachine.lastMaintenance)}
+Created:        ${MechCare.formatDate(currentMachine.createdDate)}
+
+SERVICE HISTORY (${logs.length} records)
+${logs.length === 0 ? 'No service records available' :
+                logs.map(log => `- ${MechCare.formatDate(log.date)}: ${log.notes}`).join('\n')
+            }
+
+RECOMMENDATIONS
+${quality.needsMaintenance ?
+                '⚠️ IMMEDIATE MAINTENANCE REQUIRED' :
+                quality.quality < 50 ?
+                    '⚠️ Schedule maintenance soon' :
+                    '✓ Machine in good condition'
+            }
+
+================================================================================
+Mechcare • Smart Maintenance Management
+            `.trim();
+
+        const blob = new Blob([textReport], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Report-${currentMachine.name.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.txt`;
+        a.click();
+    };
+</script>
+</body>
+
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | MechCare</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <span
+                    style="font-weight: 800; font-size: 1.5rem; background: linear-gradient(135deg, #00f2ea 0%, #00a8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">MECH</span><span
+                    style="font-weight: 800; font-size: 1.5rem; color: #fff;">CARE</span>
+            </a>
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link active">Dashboard</a>
+                <a href="machines.html" class="nav-link">Machines</a>
+                <a href="reports.html" class="nav-link">Reports</a>
+                <!-- <a href="chat.html" class="nav-link">AI Assistant</a> -->
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mt-md">
+
+        <!-- Hero Section -->
+        <section class="card mb-md"
+            style="background: linear-gradient(135deg, rgba(26, 31, 41, 0.9), rgba(15, 18, 24, 0.9)); border: 1px solid var(--primary-dim);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <h1 class="mb-md" style="font-size: 2rem;">Welcome to <span class="text-primary">MechCare</span>
+                    </h1>
+                    <p class="text-muted">Smart maintenance management for your industrial equipment.</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="add-machine.html" class="btn btn-primary">+ Add Machine</a>
+                    <!-- <a href="chat.html" class="btn btn-outline">✨ AI Assistant</a> -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Stats -->
+        <div class="grid-cols-4 mb-md">
+            <!-- Total Machines -->
+            <div class="card">
+                <h3 class="text-muted" style="font-size: 0.9rem; text-transform: uppercase;">Total Machines</h3>
+                <div class="flex-center" style="justify-content: space-between; margin-top: 0.5rem;">
+                    <span id="stat-total" style="font-size: 2.5rem; font-weight: 800;">0</span>
+                    <div style="font-size: 1.5rem; color: var(--text-muted); opacity: 0.3;">🔧</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">In your inventory</div>
+            </div>
+
+            <!-- Healthy -->
+            <div class="card" style="border-bottom: 2px solid var(--success);">
+                <h3 class="text-muted" style="font-size: 0.9rem; text-transform: uppercase;">Healthy</h3>
+                <div class="flex-center" style="justify-content: space-between; margin-top: 0.5rem;">
+                    <span id="stat-healthy" style="font-size: 2.5rem; font-weight: 800;">0</span>
+                    <div style="font-size: 1.5rem; color: var(--success); opacity: 0.3;">✔</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Up to date</div>
+            </div>
+
+            <!-- Due Soon -->
+            <div class="card" style="border-bottom: 2px solid var(--accent);">
+                <h3 class="text-muted" style="font-size: 0.9rem; text-transform: uppercase;">Due Soon</h3>
+                <div class="flex-center" style="justify-content: space-between; margin-top: 0.5rem;">
+                    <span id="stat-upcoming" style="font-size: 2.5rem; font-weight: 800;">0</span>
+                    <div style="font-size: 1.5rem; color: var(--accent); opacity: 0.3;">🕒</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Within 7 days</div>
+            </div>
+
+            <!-- Overdue -->
+            <div class="card" style="border-bottom: 2px solid var(--danger);">
+                <h3 class="text-muted" style="font-size: 0.9rem; text-transform: uppercase;">Overdue</h3>
+                <div class="flex-center" style="justify-content: space-between; margin-top: 0.5rem;">
+                    <span id="stat-overdue" style="font-size: 2.5rem; font-weight: 800;">0</span>
+                    <div style="font-size: 1.5rem; color: var(--danger); opacity: 0.3;">⚠</div>
+                </div>
+                <div class="text-muted" style="font-size: 0.8rem; margin-top: 0.5rem;">Needs attention</div>
+            </div>
+        </div>
+
+        <!-- Machines List Header -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;" class="mb-md">
+            <div>
+                <h2>Your Machines</h2>
+                <p class="text-muted">Monitor and manage equipment maintenance</p>
+            </div>
+            <a href="machines.html" class="text-primary" style="font-size: 0.9rem; font-weight: 600;">View All</a>
+        </div>
+
+        <!-- Machines Grid -->
+        <div id="machines-grid" class="grid-cols-3">
+            <!-- Machines will be injected here by JS -->
+            <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                <p class="text-muted">Loading machines...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script>
+        // Dashboard specific logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const machines = MechCare.getAllMachines();
+
+            // --- Update Stats ---
+            let healthy = 0, upcoming = 0, overdue = 0;
+
+            machines.forEach(m => {
+                const status = MechCare.getMachineStatus(m);
+                if (status.status === 'Healthy') healthy++;
+                if (status.status === 'Due Soon') upcoming++;
+                if (status.status === 'Overdue') overdue++;
+            });
+
+            document.getElementById('stat-total').innerText = machines.length;
+            document.getElementById('stat-healthy').innerText = healthy;
+            document.getElementById('stat-upcoming').innerText = upcoming;
+            document.getElementById('stat-overdue').innerText = overdue;
+
+            // --- Render Machines List (Top 6) ---
+            const grid = document.getElementById('machines-grid');
+            if (machines.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem; border-style: dashed;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🏗</div>
+                        <h3 class="mb-md">No machines found</h3>
+                        <p class="text-muted mb-md">Add your first machine to start tracking maintenance.</p>
+                        <a href="add-machine.html" class="btn btn-primary">Add Machine</a>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = ''; // Clear loading
+                // Sort by urgency: Overdue first, then Due Soon, then Healthy
+                const sortedMachines = [...machines].sort((a, b) => {
+                    const statusA = MechCare.getMachineStatus(a);
+                    const statusB = MechCare.getMachineStatus(b);
+                    const order = { 'Overdue': 0, 'Due Soon': 1, 'Healthy': 2 };
+                    return order[statusA.status] - order[statusB.status];
+                });
+
+                sortedMachines.slice(0, 6).forEach(machine => {
+                    const status = MechCare.getMachineStatus(machine);
+
+                    const card = document.createElement('div');
+                    card.className = 'card animate-fade-in';
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 style="font-size: 1.1rem;">${machine.name}</h3>
+                            <span class="badge badge-${status.color}">${status.status}</span>
+                        </div>
+                        <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">${machine.type}</p>
+                        
+                        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <span style="display: inline-block; width: 20px;">📍</span> Workshop A (Placeholder)
+                        </div>
+                        <div style="margin-bottom: 0.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                            <span style="display: inline-block; width: 20px;">📅</span> Every ${machine.interval} days
+                        </div>
+                        <div style="margin-bottom: 1.5rem; font-size: 0.85rem;" class="text-${status.color}">
+                            <span style="display: inline-block; width: 20px;">⏱</span> ${status.days} days ${status.status === 'Overdue' ? 'overdue' : 'until maintenance'}
+                        </div>
+
+                        <!-- Progress Bar (Visual Flair) -->
+                        <div style="background: rgba(255,255,255,0.1); height: 4px; border-radius: 2px; margin-bottom: 0.5rem;">
+                            <div style="width: ${Math.max(5, 100 - (status.days * 2))}%; background: var(--${status.color}); height: 100%; border-radius: 2px;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            <span>Maintenance Progress</span>
+                            <span>${Math.max(5, 100 - (status.days * 2))}%</span>
+                        </div>
+
+                        <div style="border-top: 1px solid var(--border-light); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                            <a href="machine-details.html?id=${machine.id}" style="font-size: 0.9rem; font-weight: 500;">View Details</a>
+                            <span style="font-size: 1.2rem;">›</span>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
